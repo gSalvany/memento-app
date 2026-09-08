@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEMENTO</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#050505">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #050505; color: #e5e5e5; display: flex; justify-content: center; padding: 20px 12px; min-height: 100vh; }
+    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
+    .header-container { display: flex; justify-content: space-between; align-items: center; }
+    .main-title { font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; color: #fff; }
+    .btn-icon { background: none; border: 1px solid #222; color: #888; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; }
+    .btn-icon:hover { color: #fff; border-color: #444; }
+    .section-title { font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; color: #888; margin-bottom: 12px; text-transform: uppercase; }
+    .field-label { font-size: 0.75rem; color: #666; margin-bottom: 8px; }
+    .card { background-color: #0f0f0f; border: 1px solid #1f1f1f; border-radius: 12px; padding: 16px; }
+    .onboarding-container { display: flex; flex-direction: column; gap: 12px; text-align: center; padding: 24px 16px; }
+    .onboarding-input { width: 100%; background-color: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 12px; color: #fff; font-size: 0.9rem; text-align: center; }
+    
+    /* BARRAS DE TEMPO */
+    .time-group { margin-bottom: 14px; }
+    .time-group:last-child { margin-bottom: 0; }
+    .time-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; margin-bottom: 6px; }
+    .segment-bar { display: flex; gap: 3px; height: 6px; width: 100%; }
+    .segment { flex: 1; background-color: #222; border-radius: 2px; }
+    .segment.active { background-color: #fff; }
+
+    .decimal-age-container { text-align: center; padding: 8px 0; }
+    .decimal-age-value { font-size: 2.2rem; font-weight: 700; color: #fff; }
+    .decimal-age-label { font-size: 0.75rem; color: #666; }
+
+    /* PROVOCAÇÃO FILOSÓFICA */
+    .quote-container { display: flex; flex-direction: column; gap: 8px; }
+    .quote-text { font-size: 0.85rem; font-style: italic; color: #ddd; line-height: 1.4; }
+    .quote-author { font-size: 0.7rem; color: #777; text-align: right; font-weight: 600; }
+    .quote-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-secondary { background-color: #1a1a1a; border: 1px solid #2a2a2a; color: #ccc; padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; flex: 1; }
+
+    .collapsible-box { display: none; background-color: #141414; border: 1px solid #262626; border-radius: 8px; padding: 12px; margin-top: 10px; }
+    .collapsible-box input { width: 100%; background-color: #0a0a0a; border: 1px solid #262626; border-radius: 6px; padding: 8px; color: #fff; font-size: 0.75rem; margin-bottom: 8px; }
+    .quotes-list { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .quote-item { display: flex; justify-content: space-between; align-items: center; background-color: #0a0a0a; padding: 6px 8px; border-radius: 4px; font-size: 0.7rem; color: #aaa; }
+    .btn-delete-quote { background: none; border: none; color: #ff5555; cursor: pointer; }
+
+    .coin-result { display: none; margin-top: 10px; padding: 10px; background-color: #141414; border-left: 3px solid #fff; font-size: 0.75rem; color: #ddd; }
+
+    /* FORMULÁRIO COM UX DINÂMICA */
+    .scope-selector { display: flex; gap: 6px; margin-bottom: 12px; }
+    .scope-btn { flex: 1; background-color: #141414; border: 1px solid #222; color: #777; padding: 8px 0; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+    .scope-btn.active { background-color: #222; color: #fff; border-color: #444; font-weight: 600; }
+    
+    .status-banner { display: none; background-color: #1a2332; border: 1px solid #2b4263; color: #8ab4f8; font-size: 0.7rem; padding: 8px 10px; border-radius: 6px; margin-bottom: 10px; }
+
+    textarea#noteInput { width: 100%; height: 80px; background-color: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 10px; color: #fff; font-size: 0.8rem; resize: vertical; margin-bottom: 10px; }
+    .media-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .media-inputs input[type="url"] { width: 100%; background-color: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.8rem; }
+    .file-label { font-size: 0.75rem; color: #888; cursor: pointer; }
+    .file-label input[type="file"] { display: none; }
+    .file-name-display { font-size: 0.7rem; color: #aaa; }
+
+    .btn-primary { width: 100%; background-color: #fff; color: #000; border: none; padding: 10px 0; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+
+    /* TIMELINE */
+    .timeline-filters { display: flex; gap: 8px; margin-bottom: 12px; }
+    .timeline-filters select { flex: 1; background-color: #0f0f0f; border: 1px solid #222; color: #aaa; padding: 6px 8px; border-radius: 6px; font-size: 0.75rem; }
+    
+    details { background-color: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 8px; margin-bottom: 10px; padding: 6px 10px; }
+    details[open] { border-color: #2a2a2a; }
+    summary { cursor: pointer; font-size: 0.8rem; font-weight: 600; padding: 6px 0; color: #eee; user-select: none; outline: none; display: flex; justify-content: space-between; align-items: center; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '►'; font-size: 0.65rem; color: #666; transition: transform 0.2s; }
+    details[open] > summary::after { transform: rotate(90deg); }
+
+    .bloco-mes { border-left: 3px solid #fff; }
+    .bloco-semana { margin-top: 8px; margin-left: 8px; background-color: #121212; border-left: 2px solid #666; }
+    .conteudo-secao { display: flex; flex-direction: column; gap: 8px; padding: 8px 0; }
+
+    .flashcard { position: relative; background-color: #0f0f0f; border: 1px solid #1f1f1f; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease; user-select: none; }
+    .card-body { font-size: 0.8rem; color: #ddd; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; }
+    .card-close-btn { display: none; position: absolute; top: 8px; right: 8px; background: none; border: none; color: #888; font-size: 1rem; cursor: pointer; padding: 2px 6px; }
+    .card-expandable-content { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #222; }
+
+    .flashcard.expanded { border-color: #444; background-color: #141414; }
+    .flashcard.expanded .card-body { display: block; overflow: visible; }
+    .flashcard.expanded .card-close-btn { display: block; }
+    .flashcard.expanded .card-expandable-content { display: block; }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-right: 20px; }
+    .scope-tag { font-size: 0.65rem; font-weight: 700; background-color: #222; color: #eee; padding: 2px 6px; border-radius: 4px; }
+    .card-date { font-size: 0.65rem; color: #555; }
+    .card-quote-ref { font-size: 0.7rem; font-style: italic; color: #666; border-left: 2px solid #333; padding-left: 6px; margin-bottom: 6px; }
+    .card-link { display: inline-block; color: #64b5f6; font-size: 0.75rem; text-decoration: none; margin-bottom: 8px; word-break: break-all; }
+    .card-image { max-width: 100%; border-radius: 6px; margin-top: 6px; display: block; }
+    .card-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-card-action { background-color: #1f1f1f; border: 1px solid #333; color: #aaa; font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="header-container">
+      <h1 class="main-title">MEMENTO</h1>
+      <button id="btnEditBirth" class="btn-icon" style="display: none;">🗓️ Nascimento</button>
+    </div>
+
+    <section id="onboardingSection" class="card onboarding-container">
+      <h2 style="font-size: 1rem; color: #fff;">BEM-VINDO AO MEMENTO</h2>
+      <p style="font-size: 0.75rem; color: #888; line-height: 1.4;">
+        A vida não é medida pelo calendário, mas pela presença com que você atravessa cada ciclo.<br><br>
+        Para personalizar o seu tempo, informe sua data de nascimento:
+      </p>
+      <input type="date" id="birthInput" class="onboarding-input">
+      <button id="btnStart" class="btn-primary" style="margin-top: 8px;">Iniciar Minha Jornada</button>
+    </section>
+
+    <div id="appContent" style="display: none; flex-direction: column; gap: 16px;">
+      
+      <!-- PAINEL DE TEMPO -->
+      <section class="card">
+        <div class="decimal-age-container">
+          <div id="livedDays" class="decimal-age-value">0</div>
+          <div class="decimal-age-label">DIAS VIVIDOS NA TERRA</div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <h2 class="section-title">SEGMENTAÇÃO DO TEMPO</h2>
+          <div class="time-group">
+            <div class="time-header"><span>Semana (Seg - Dom)</span><span id="weekText">0 / 7 dias</span></div>
+            <div id="weekBar" class="segment-bar"></div>
+          </div>
+          <div class="time-group">
+            <div class="time-header"><span>Mês Vigente</span><span id="monthText">0 / 30 dias</span></div>
+            <div id="monthBar" class="segment-bar"></div>
+          </div>
+          <div class="time-group">
+            <div class="time-header"><span>Ano Civil</span><span id="yearText">0 dias passados</span></div>
+            <div id="yearBar" class="segment-bar"></div>
+          </div>
+          <div class="time-group">
+            <div class="time-header"><span>Ano Pessoal (Ciclo de Vida)</span><span id="decimalAge">0</span></div>
+            <div id="personalYearSubtext" class="field-label" style="margin-top: 4px;">Faltam 0 dias para o seu próximo ciclo</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROVOCAÇÃO FILOSÓFICA -->
+      <section class="card">
+        <h2 class="section-title">PROVOCAÇÃO FILOSÓFICA</h2>
+        <div class="quote-container">
+          <p id="quoteText" class="quote-text">"Carregando..."</p>
+          <p id="quoteAuthor" class="quote-author">— MEMENTO</p>
+        </div>
+        <div class="quote-actions">
+          <button id="nextQuoteBtn" class="btn-secondary">Alternar provocação ↻</button>
+          <button id="toggleAddQuote" class="btn-secondary">+ Nova</button>
+          <button id="toggleManageQuotes" class="btn-secondary">Gerenciar ⚙</button>
+        </div>
+
+        <div id="addQuoteBox" class="collapsible-box">
+          <input type="text" id="newQuoteText" placeholder="Digite a frase/provocação...">
+          <input type="text" id="newQuoteAuthor" placeholder="Autor ou Fonte (ex: Nietzsche)">
+          <button id="saveQuoteBtn" class="btn-primary">Salvar Provocação</button>
+        </div>
+
+        <div id="manageQuotesBox" class="collapsible-box">
+          <p class="field-label">Sua Biblioteca de Provocações:</p>
+          <div id="quotesListContainer" class="quotes-list"></div>
+        </div>
+      </section>
+
+      <!-- MOEDA DE DECISÃO -->
+      <section class="card">
+        <h2 class="section-title">MOEDA DE DECISÃO</h2>
+        <p class="field-label">Impasse ou hesitação?</p>
+        <button id="flipCoinBtn" class="btn-secondary" style="width: 100%;">Girar Moeda 🪙</button>
+        <div id="coinResult" class="coin-result"></div>
+      </section>
+
+      <!-- CRIAÇÃO DE SENTIDO (UX DINÂMICA DE ESCOPO ÚNICO) -->
+      <section class="card">
+        <h2 class="section-title">CRIAÇÃO DE SENTIDO</h2>
+        <p class="field-label">Crie ou atualize o sentido para o seu ciclo.</p>
+        
+        <div class="scope-selector">
+          <button class="scope-btn active" data-scope="Dia">Dia</button>
+          <button class="scope-btn" data-scope="Semana">Semana</button>
+          <button class="scope-btn" data-scope="Mês">Mês</button>
+        </div>
+
+        <div id="statusBanner" class="status-banner"></div>
+
+        <textarea id="noteInput" placeholder="Escreva uma reflexão ou presença..."></textarea>
+        
+        <div class="media-inputs">
+          <input type="url" id="linkInput" placeholder="Cole um link relevante (opcional)">
+          
+          <label class="file-label" for="imageInput">
+            📷 Anexar/Substituir Imagem
+            <input type="file" id="imageInput" accept="image/*">
+          </label>
+          <span id="fileNameDisplay" class="file-name-display"></span>
+        </div>
+
+        <button id="saveBtn" class="btn-primary">Guardar no Meu Tempo</button>
+      </section>
+
+      <!-- LINHA DO TEMPO -->
+      <section class="card">
+        <h2 class="section-title">LINHA DO TEMPO DE MEMÓRIAS</h2>
+        <div class="timeline-filters">
+          <select id="scopeFilter">
+            <option value="ALL">Todos os escopos</option>
+            <option value="Dia">Dia</option>
+            <option value="Semana">Semana</option>
+            <option value="Mês">Mês</option>
+          </select>
+        </div>
+        <div id="timelineList"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    // ESTADO E BANCO LOCAL
+    let memories = JSON.parse(localStorage.getItem('memento_memories')) || [];
+    let quotes = JSON.parse(localStorage.getItem('memento_quotes')) || [
+      { text: "A vida não é curta; nós é que a fazemos curta.", author: "Sêneca" },
+      { text: "Aquele que tem um porquê para viver pode suportar quase qualquer como.", author: "Nietzsche" },
+      { text: "Sua vida é o resultado das suas escolhas de cada dia.", author: "Marcus Aurelius" }
+    ];
+    let selectedScope = 'Dia';
+    let currentQuoteIndex = 0;
+    let editingMemoryId = null;
+
+    // DATA DE NASCIMENTO & TELAS
+    const onboardingSection = document.getElementById('onboardingSection');
+    const appContent = document.getElementById('appContent');
+    const birthInput = document.getElementById('birthInput');
+    const btnStart = document.getElementById('btnStart');
+    const btnEditBirth = document.getElementById('btnEditBirth');
+
+    function checkBirthDate() {
+      const savedBirth = localStorage.getItem('memento_birth');
+      if (savedBirth) {
+        onboardingSection.style.display = 'none';
+        appContent.style.display = 'flex';
+        btnEditBirth.style.display = 'block';
+        birthInput.value = savedBirth;
+        updateCalculations(savedBirth);
+      } else {
+        onboardingSection.style.display = 'flex';
+        appContent.style.display = 'none';
+        btnEditBirth.style.display = 'none';
+      }
+    }
+
+    btnStart.addEventListener('click', () => {
+      const val = birthInput.value;
+      if (!val) { alert('Por favor, selecione sua data de nascimento.'); return; }
+      localStorage.setItem('memento_birth', val);
+      checkBirthDate();
+    });
+
+    btnEditBirth.addEventListener('click', () => {
+      onboardingSection.style.display = 'flex';
+      appContent.style.display = 'none';
+    });
+
+    // CÁLCULOS DO TEMPO
+    function updateCalculations(birthStr) {
+      const birth = new Date(birthStr);
+      const now = new Date();
+      
+      const diffMs = now - birth;
+      document.getElementById('livedDays').innerText = Math.floor(diffMs / (1000 * 60 * 60 * 24)).toLocaleString('pt-BR');
+      document.getElementById('decimalAge').innerText = (diffMs / (1000 * 60 * 60 * 24 * 365.25)).toFixed(2) + " anos";
+
+      let nextBirth = new Date(now.getFullYear(), birth.getMonth(), birth.getDate());
+      if (now > nextBirth) nextBirth.setFullYear(now.getFullYear() + 1);
+      document.getElementById('personalYearSubtext').innerText = `Faltam ${Math.ceil((nextBirth - now) / (1000 * 60 * 60 * 24))} dias para o seu próximo ciclo`;
+
+      const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay();
+      renderBar('weekBar', 7, dayOfWeek);
+      document.getElementById('weekText').innerText = `${dayOfWeek} / 7 dias`;
+
+      const totalMonthDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const currentDayOfMonth = now.getDate();
+      renderBar('monthBar', 30, Math.round((currentDayOfMonth / totalMonthDays) * 30));
+      document.getElementById('monthText').innerText = `${currentDayOfMonth} / ${totalMonthDays} dias`;
+
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+      const totalYearDays = (now.getFullYear() % 4 === 0 && now.getFullYear() % 100 !== 0) || (now.getFullYear() % 400 === 0) ? 366 : 365;
+      renderBar('yearBar', 20, Math.round((dayOfYear / totalYearDays) * 20));
+      document.getElementById('yearText').innerText = `${dayOfYear} dias passados (${Math.round((dayOfYear/totalYearDays)*100)}%)`;
+    }
+
+    function renderBar(containerId, totalSegments, activeCount) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      for (let i = 0; i < totalSegments; i++) {
+        const seg = document.createElement('div');
+        seg.className = 'segment' + (i < activeCount ? ' active' : '');
+        container.appendChild(seg);
+      }
+    }
+
+    // PROVOCAÇÃO FILOSÓFICA & MOEDA
+    function showQuote(index) {
+      if (quotes.length === 0) return;
+      currentQuoteIndex = index % quotes.length;
+      document.getElementById('quoteText').innerText = `"${quotes[currentQuoteIndex].text}"`;
+      document.getElementById('quoteAuthor').innerText = `— ${quotes[currentQuoteIndex].author || 'Anônimo'}`;
+    }
+
+    document.getElementById('nextQuoteBtn').addEventListener('click', () => showQuote(currentQuoteIndex + 1));
+    document.getElementById('toggleAddQuote').addEventListener('click', () => {
+      const box = document.getElementById('addQuoteBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    });
+    document.getElementById('toggleManageQuotes').addEventListener('click', () => {
+      const box = document.getElementById('manageQuotesBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+      renderQuotesList();
+    });
+
+    document.getElementById('saveQuoteBtn').addEventListener('click', () => {
+      const text = document.getElementById('newQuoteText').value.trim();
+      const author = document.getElementById('newQuoteAuthor').value.trim();
+      if (!text) return;
+      quotes.push({ text, author });
+      localStorage.setItem('memento_quotes', JSON.stringify(quotes));
+      document.getElementById('newQuoteText').value = '';
+      document.getElementById('newQuoteAuthor').value = '';
+      document.getElementById('addQuoteBox').style.display = 'none';
+      showQuote(quotes.length - 1);
+    });
+
+    function renderQuotesList() {
+      const container = document.getElementById('quotesListContainer');
+      container.innerHTML = '';
+      quotes.forEach((q, idx) => {
+        const item = document.createElement('div');
+        item.className = 'quote-item';
+        item.innerHTML = `<span>"${q.text}" (${q.author})</span><button class="btn-delete-quote" onclick="deleteQuote(${idx})">✕</button>`;
+        container.appendChild(item);
+      });
+    }
+
+    window.deleteQuote = function(idx) {
+      quotes.splice(idx, 1);
+      localStorage.setItem('memento_quotes', JSON.stringify(quotes));
+      renderQuotesList();
+      showQuote(0);
+    };
+
+    document.getElementById('flipCoinBtn').addEventListener('click', () => {
+      const resultBox = document.getElementById('coinResult');
+      resultBox.style.display = 'block';
+      resultBox.innerText = Math.random() < 0.5 ? "🪙 RESPOSTA DA MOEDA: SIM / SIGA EM FRENTE" : "🪙 RESPOSTA DA MOEDA: NÃO / REAVALIE";
+    });
+
+    // CÁLCULO DE SEMANA ISO
+    function getWeekKey(dateObj) {
+      const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return `Semana ${Math.ceil((((d - yearStart) / 86400000) + 1) / 7)}`;
+    }
+
+    // UX DINÂMICA DE ESCOPO ÚNICO NO FORMULÁRIO
+    const statusBanner = document.getElementById('statusBanner');
+    const noteInput = document.getElementById('noteInput');
+    const linkInput = document.getElementById('linkInput');
+    const imageInput = document.getElementById('imageInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const saveBtn = document.getElementById('saveBtn');
+
+    document.querySelectorAll('.scope-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.scope-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        selectedScope = e.target.dataset.scope || e.target.innerText.trim();
+        checkExistingScopeNote();
+      });
+    });
+
+    function checkExistingScopeNote() {
+      const now = new Date();
+      const currentWeekKey = getWeekKey(now);
+      const currentMonthYear = `${now.toLocaleDateString('pt-BR', { month: 'long' }).charAt(0).toUpperCase() + now.toLocaleDateString('pt-BR', { month: 'long' }).slice(1)} de ${now.getFullYear()}`;
+
+      editingMemoryId = null;
+      statusBanner.style.display = 'none';
+      saveBtn.innerText = 'Guardar no Meu Tempo';
+
+      if (selectedScope === 'Semana') {
+        const existingWeek = memories.find(m => m.scope === 'Semana' && m.weekKey === currentWeekKey);
+        if (existingWeek) {
+          editingMemoryId = existingWeek.id;
+          noteInput.value = existingWeek.text;
+          linkInput.value = existingWeek.link || '';
+          statusBanner.innerText = `ℹ️ Edição da Intenção da ${currentWeekKey}. Alterações atualizarão o ciclo atual.`;
+          statusBanner.style.display = 'block';
+          saveBtn.innerText = 'Atualizar Intenção da Semana';
+        } else {
+          noteInput.value = '';
+          linkInput.value = '';
+        }
+      } else if (selectedScope === 'Mês') {
+        const existingMonth = memories.find(m => m.scope === 'Mês' && m.monthYear === currentMonthYear);
+        if (existingMonth) {
+          editingMemoryId = existingMonth.id;
+          noteInput.value = existingMonth.text;
+          linkInput.value = existingMonth.link || '';
+          statusBanner.innerText = `ℹ️ Edição da Intenção do Mês (${currentMonthYear}). Alterações atualizarão o ciclo atual.`;
+          statusBanner.style.display = 'block';
+          saveBtn.innerText = 'Atualizar Intenção do Mês';
+        } else {
+          noteInput.value = '';
+          linkInput.value = '';
+        }
+      } else {
+        noteInput.value = '';
+        linkInput.value = '';
+      }
+    }
+
+    imageInput.addEventListener('change', () => {
+      fileNameDisplay.innerText = imageInput.files && imageInput.files[0] ? "Imagem: " + imageInput.files[0].name : "";
+    });
+
+    // SALVAR / ATUALIZAR MEMÓRIA (Base64 para imagens permanentes)
+    saveBtn.addEventListener('click', async () => {
+      const text = noteInput.value.trim();
+      if (!text) { alert('Por favor, escreva uma reflexão.'); return; }
+
+      const now = new Date();
+      const quoteText = document.getElementById('quoteText').innerText.replace(/"/g, '').trim();
+
+      let imageBase64 = '';
+      if (imageInput.files && imageInput.files[0]) {
+        imageBase64 = await convertBase64(imageInput.files[0]);
+      }
+
+      if (editingMemoryId) {
+        // Atualiza a nota existente (Semana/Mês)
+        const idx = memories.findIndex(m => m.id === editingMemoryId);
+        if (idx !== -1) {
+          memories[idx].text = text;
+          memories[idx].link = linkInput.value.trim();
+          memories[idx].quote = quoteText ? `"${quoteText}"` : memories[idx].quote;
+          if (imageBase64) memories[idx].image = imageBase64;
+        }
+      } else {
+        // Cria nova nota
+        const newMemory = {
+          id: Date.now(),
+          text: text,
+          scope: selectedScope,
+          timestamp: now.getTime(),
+          date: now.toLocaleDateString('pt-BR'),
+          time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          weekKey: getWeekKey(now),
+          monthYear: `${now.toLocaleDateString('pt-BR', { month: 'long' }).charAt(0).toUpperCase() + now.toLocaleDateString('pt-BR', { month: 'long' }).slice(1)} de ${now.getFullYear()}`,
+          quote: quoteText ? `"${quoteText}"` : '',
+          link: linkInput.value.trim(),
+          image: imageBase64
+        };
+        memories.unshift(newMemory);
+      }
+
+      localStorage.setItem('memento_memories', JSON.stringify(memories));
+      noteInput.value = '';
+      linkInput.value = '';
+      imageInput.value = '';
+      fileNameDisplay.innerText = '';
+      checkExistingScopeNote();
+      renderTimeline();
+    });
+
+    function convertBase64(file) {
+      return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = () => resolve(fileReader.result);
+        fileReader.onerror = (error) => reject(error);
+      });
+    }
+
+    // LINHA DO TEMPO HIERÁRQUICA
+    const scopeFilter = document.getElementById('scopeFilter');
+    if (scopeFilter) scopeFilter.addEventListener('change', renderTimeline);
+
+    function renderTimeline() {
+      const container = document.getElementById('timelineList');
+      if (!container) return;
+
+      const filterVal = scopeFilter ? scopeFilter.value : 'ALL';
+      const filteredMemories = memories.filter(m => filterVal === 'ALL' || m.scope === filterVal);
+
+      container.innerHTML = '';
+      if (filteredMemories.length === 0) {
+        container.innerHTML = '<div style="color:#777; font-size:0.85rem; text-align:center; padding: 20px;">Nenhum registro encontrado.</div>';
+        return;
+      }
+
+      const hierarquia = {};
+
+      filteredMemories.forEach(m => {
+        let mesKey = m.monthYear || 'Geral';
+        let semKey = m.weekKey || getWeekKey(m.timestamp ? new Date(m.timestamp) : new Date());
+
+        if (!hierarquia[mesKey]) hierarquia[mesKey] = { intencaoMes: null, semanas: {} };
+
+        if (m.scope === 'Mês') {
+          hierarquia[mesKey].intencaoMes = m;
+        } else {
+          if (!hierarquia[mesKey].semanas[semKey]) hierarquia[mesKey].semanas[semKey] = { intencaoSemana: null, dias: [] };
+          if (m.scope === 'Semana') hierarquia[mesKey].semanas[semKey].intencaoSemana = m;
+          else hierarquia[mesKey].semanas[semKey].dias.push(m);
+        }
+      });
+
+      const agora = new Date();
+      const mesAtualNome = agora.toLocaleDateString('pt-BR', { month: 'long' });
+      const semanaAtualKey = getWeekKey(agora);
+
+      Object.keys(hierarquia).forEach(mesKey => {
+        const dadosMes = hierarquia[mesKey];
+        const detailsMes = document.createElement('details');
+        detailsMes.className = 'bloco-mes';
+        if (mesKey.toLowerCase().includes(mesAtualNome.toLowerCase())) detailsMes.open = true;
+
+        detailsMes.innerHTML = `<summary>${mesKey}</summary><div class="conteudo-secao"></div>`;
+        const containerMes = detailsMes.querySelector('.conteudo-secao');
+
+        if (dadosMes.intencaoMes) {
+          const cardMes = createCardElement(dadosMes.intencaoMes, 'INTENÇÃO DO MÊS');
+          cardMes.style.borderLeft = '3px solid #64b5f6';
+          containerMes.appendChild(cardMes);
+        }
+
+        Object.keys(dadosMes.semanas).forEach(semKey => {
+          const dadosSemana = dadosMes.semanas[semKey];
+          const detailsSemana = document.createElement('details');
+          detailsSemana.className = 'bloco-semana';
+          if (semKey === semanaAtualKey) detailsSemana.open = true;
+
+          detailsSemana.innerHTML = `<summary>${semKey}</summary><div class="conteudo-secao"></div>`;
+          const containerSemana = detailsSemana.querySelector('.conteudo-secao');
+
+          if (dadosSemana.intencaoSemana) {
+            const cardSemana = createCardElement(dadosSemana.intencaoSemana, 'INTENÇÃO DA SEMANA');
+            cardSemana.style.borderLeft = '3px solid #81c784';
+            containerSemana.appendChild(cardSemana);
+          }
+
+          dadosSemana.dias.forEach(mDia => containerSemana.appendChild(createCardElement(mDia, 'DIA')));
+          containerMes.appendChild(detailsSemana);
+        });
+
+        container.appendChild(detailsMes);
+      });
+    }
+
+    function createCardElement(m, tagOverride) {
+      const card = document.createElement('div');
+      card.className = 'flashcard';
+      card.addEventListener('click', () => { if (!card.classList.contains('expanded')) card.classList.add('expanded'); });
+
+      card.innerHTML = `
+        <button class="card-close-btn" title="Fechar">✕</button>
+        <div class="card-header">
+          <span class="scope-tag">${tagOverride || m.scope.toUpperCase()}</span>
+          <span class="card-date">${m.date} às ${m.time}</span>
+        </div>
+        ${m.quote ? `<div class="card-quote-ref">${m.quote}</div>` : ''}
+        <div class="card-body">${m.text}</div>
+        <div class="card-expandable-content">
+          ${m.link ? `<a href="${m.link}" target="_blank" class="card-link" onclick="event.stopPropagation();">🔗 ${m.link}</a>` : ''}
+          ${m.image ? `<img src="${m.image}" class="card-image" alt="Anexo">` : ''}
+        </div>
+      `;
+
+      card.querySelector('.card-close-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        card.classList.remove('expanded');
+      });
+
+      return card;
+    }
+
+    // REGISTRO DO SERVICE WORKER (PWA)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW erro:', err));
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkBirthDate();
+      showQuote(0);
+      renderTimeline();
+    });
+  </script>
+</body>
+</html>
